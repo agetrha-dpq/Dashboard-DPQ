@@ -291,6 +291,7 @@
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz6o2upGQqcevRrMjVzce-cfV6Ddi0x_PRkiWACHZejp-RVv18nEztGrgRqNJu31sPyVw/exec';
         const CANDIDATURAS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwmddNGXvdBjU8VZfng30uunDK4OHArVURLz2tyIcJkZ4IMJqxZZEYxZM-yvSSlc6o6Ww/exec';
         const RELATORIOS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxT52lbMXfMcC0okdOxrq4JC_pZAyy8DBXasdUJd6SvQONJqH-hPf4omgiQj9_6v5nU/exec';
+        const FICHAS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw2naRbjWiyDxyydJ0a87hvNMv2dcjh-sBWusQw0TDjv8TSXK8BMjgnYOvuFjdTQenD/exec'
         const GAS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbw3B3EVziPJVJr-4g1DxFWeHpIaXecl36iBxebJI4GrA-3L6-qM4LcAM2bkLKDr9n8W-w/exec';
         const MEMBERS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbwkAAbyTFC8wvyd3RozC6eXzu36VPbTvy9g02Sj4058eRl0SZZRlmRtjoQOscJ_fek1kA/exec';
         const LOGIN_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxn77v_c-kyOyC0OqcS0wM13jontZtDRrqygWGnkQ15d6ubumoBhvMpSXR5SMmtgNHv/exec';
@@ -453,48 +454,138 @@
 
         // Fichas
         async function carregarMembrosFicha() {
-            const sel = document.getElementById('ficha-membro-select'); sel.innerHTML = '<option value="">Selecione um membro...</option>';
-            try {
-                const r = await fetch(`${SCRIPT_URL}?action=getMembers`); const d = await r.json();
-                if(d.success && d.members) d.members.forEach(m=>{ 
-    const o=document.createElement('option'); 
-    o.value=m.nome; 
-    o.textContent=m.nome; 
-    o.dataset.dataAdmissao=m.dataAdmissao||''; 
-    o.dataset.cadastradoPor=m.cadastradoPor||''; 
-    sel.appendChild(o); 
-});
-            } catch(e) { console.error(e); }
-        }
+  const sel = document.getElementById('ficha-membro-select');
+  sel.innerHTML = '<option value="">Selecione um membro...</option>';
+  try {
+    const r = await fetch(`${FICHAS_SCRIPT_URL}?action=getMembrosOrigem`);
+    const d = await r.json();
+    if (d.success && d.membros) {
+      d.membros.forEach(m => {
+        const o = document.createElement('option');
+        o.value = m.nome;
+        o.textContent = m.nome;
+        o.dataset.dataCadastro = m.dataCadastro;
+        o.dataset.cadastradoPor = m.cadastradoPor;
+        sel.appendChild(o);
+      });
+    }
+  } catch(e) { console.error(e); }
+}
 
-        function carregarTabelaFichas(filtro='') {
-            const tbody = document.getElementById('corpo-tabela-fichas'); tbody.innerHTML = '';
-            const dados = filtro ? fichasMembro.filter(f=>f.nome.toLowerCase().includes(filtro.toLowerCase())) : fichasMembro;
-            if(!dados.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">Nenhuma ficha encontrada.</td></tr>'; return; }
-            dados.forEach(f=>{ tbody.innerHTML += `<tr><td>${f.nome}</td><td>${f.dataCadastro}</td><td>${f.cadastradoPor}</td><td class="action-buttons"><button class="action-btn view" onclick="window.open('${f.urlPDF}','_blank')"><i class="fas fa-eye"></i></button><button class="action-btn edit" onclick="editarFicha('${f.id}')"><i class="fas fa-edit"></i></button></td></tr>`; });
-        }
+        async function carregarTabelaFichas(filtro = '') {
+  const tbody = document.getElementById('corpo-tabela-fichas');
+  tbody.innerHTML = '<tr><td colspan="4">Carregando...</td></tr>';
+  try {
+    const r = await fetch(`${FICHAS_SCRIPT_URL}?action=getFichas`);
+    const d = await r.json();
+    if (!d.success) throw new Error(d.message);
+    let fichas = d.fichas;
+    if (filtro) fichas = fichas.filter(f => f.fichaMembro.toLowerCase().includes(filtro.toLowerCase()));
+    tbody.innerHTML = '';
+    if (!fichas.length) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">Nenhuma ficha encontrada.</td></tr>';
+      return;
+    }
+    fichas.forEach(f => {
+      tbody.innerHTML += `<tr>
+        <td>${f.fichaMembro}</td>
+        <td>${f.dataCadastro}</td>
+        <td>${f.cadastradoPor}</td>
+        <td class="action-buttons">
+          <button class="action-btn view" onclick="window.open('${f.url}','_blank')"><i class="fas fa-eye"></i></button>
+          <button class="action-btn edit" onclick="editarFicha('${f.id}')"><i class="fas fa-edit"></i></button>
+          <button class="action-btn delete" onclick="excluirFicha('${f.id}')"><i class="fas fa-trash"></i></button>
+        </td>
+      </tr>`;
+    });
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="4" style="color:red">Erro: ${e.message}</td></tr>`;
+  }
+}
 
         async function salvarFicha() {
-            const nome = document.getElementById('ficha-membro-select').value;
-            const pdf = document.getElementById('ficha-pdf').files[0];
-            if(!nome||!pdf) return alert('Preencha todos os campos obrigatórios.');
-            const base64 = await fileToBase64(pdf);
-            const res = await callAppScriptRelatorios('uploadPDF', {nome, tipoRelatorio:'Ficha de Membro', pdfData:base64});
-            if(res.success) {
-                fichasMembro.push({id:Date.now().toString(), nome, dataCadastro:document.getElementById('ficha-data-cadastro').value, cadastradoPor:'Administrador', urlPDF:res.url||res.downloadUrl||''});
-                localStorage.setItem('fichasMembro', JSON.stringify(fichasMembro));
-                document.getElementById('modal-adicionar-ficha').style.display='none'; document.getElementById('form-ficha-membro').reset();
-                carregarTabelaFichas();
-            } else alert('Erro: '+(res.message||'Falha no upload'));
-        }
+  const nomeMembro = document.getElementById('ficha-membro-select').value;
+  const pdf = document.getElementById('ficha-pdf').files[0];
+  if (!nomeMembro || !pdf) return alert('Preencha todos os campos obrigatórios.');
 
-        function editarFicha(id) {
-            const f = fichasMembro.find(x=>x.id===id); if(!f) return;
-            document.getElementById('edit-ficha-id').value=f.id;
-            document.getElementById('edit-ficha-data-cadastro').value=f.dataCadastro;
-            document.getElementById('edit-ficha-cadastrado-por').value=f.cadastradoPor;
-            document.getElementById('modal-editar-ficha').style.display='flex';
-        }
+  const base64 = await fileToBase64(pdf);
+  const fd = new FormData();
+  fd.append('action', 'saveFicha');
+  fd.append('nomeMembro', nomeMembro);
+  fd.append('dataCadastro', document.getElementById('ficha-data-cadastro').value);
+  fd.append('cadastradoPor', document.getElementById('ficha-cadastrado-por').value);
+  fd.append('pdfData', base64);
+  fd.append('pdfNome', pdf.name);
+
+  const r = await fetch(FICHAS_SCRIPT_URL, { method: 'POST', body: fd });
+  const res = await r.json();
+  if (res.success) {
+    alert('Ficha salva!');
+    document.getElementById('modal-adicionar-ficha').style.display = 'none';
+    carregarTabelaFichas();
+  } else {
+    alert('Erro: ' + res.message);
+  }
+}
+
+        async function editarFicha(id) {
+  // Busca os dados completos da ficha
+  const r = await fetch(`${FICHAS_SCRIPT_URL}?action=getFichas`);
+  const d = await r.json();
+  const f = d.fichas.find(x => x.id === id);
+  if (!f) return alert('Ficha não encontrada');
+  document.getElementById('edit-ficha-id').value = f.id;
+  document.getElementById('edit-ficha-membro-select').value = f.fichaMembro;
+  document.getElementById('edit-ficha-data-cadastro').value = f.dataCadastro;
+  document.getElementById('edit-ficha-cadastrado-por').value = f.cadastradoPor;
+  // Carregar dropdown para edição (se necessário)
+  document.getElementById('modal-editar-ficha').style.display = 'flex';
+}
+
+async function salvarEdicaoFicha() {
+  const id = document.getElementById('edit-ficha-id').value;
+  const nomeMembro = document.getElementById('edit-ficha-membro-select').value;
+  const dataCadastro = document.getElementById('edit-ficha-data-cadastro').value;
+  const cadastradoPor = document.getElementById('edit-ficha-cadastrado-por').value;
+  const novoPdfInput = document.getElementById('edit-ficha-pdf'); // se adicionar campo de PDF
+
+  const fd = new FormData();
+  fd.append('action', 'updateFicha');
+  fd.append('id', id);
+  fd.append('nomeMembro', nomeMembro);
+  fd.append('dataCadastro', dataCadastro);
+  fd.append('cadastradoPor', cadastradoPor);
+  if (novoPdfInput && novoPdfInput.files.length) {
+    fd.append('pdfData', await fileToBase64(novoPdfInput.files[0]));
+    fd.append('pdfNome', novoPdfInput.files[0].name);
+  }
+
+  const r = await fetch(FICHAS_SCRIPT_URL, { method: 'POST', body: fd });
+  const res = await r.json();
+  if (res.success) {
+    alert('Ficha atualizada!');
+    document.getElementById('modal-editar-ficha').style.display = 'none';
+    carregarTabelaFichas();
+  } else {
+    alert('Erro: ' + res.message);
+  }
+}
+
+async function excluirFicha(id) {
+  if (!confirm('Tem certeza que deseja excluir esta ficha?')) return;
+  const fd = new FormData();
+  fd.append('action', 'deleteFicha');
+  fd.append('id', id);
+  const r = await fetch(FICHAS_SCRIPT_URL, { method: 'POST', body: fd });
+  const res = await r.json();
+  if (res.success) {
+    alert('Ficha excluída!');
+    carregarTabelaFichas();
+  } else {
+    alert('Erro: ' + res.message);
+  }
+}
+        
 
         function salvarEdicaoFicha() {
             const id = document.getElementById('edit-ficha-id').value;
