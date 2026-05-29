@@ -280,8 +280,41 @@
 
     <div id="modal-adicionar-ficha" class="modal"><div class="modal-content" style="max-width:600px"><div class="modal-header"><h2>Adicionar Ficha de Membro</h2><button id="btn-fechar-modal-ficha" style="background:none;border:none;font-size:20px;cursor:pointer">&times;</button></div><div class="modal-body"><form id="form-ficha-membro"><div class="form-group"><label>Ficha de Membro *</label><select id="ficha-membro-select" class="form-control" required></select></div><div class="form-group"><label>Data de Cadastro</label><input type="text" id="ficha-data-cadastro" class="form-control" readonly></div><div class="form-group"><label>Cadastrado Por</label><input type="text" id="ficha-cadastrado-por" class="form-control" readonly></div><div class="form-group"><label>Ficheiro PDF *</label><input type="file" id="ficha-pdf" class="form-control" accept=".pdf" required></div></form></div><div class="modal-footer"><button class="btn" id="btn-cancelar-ficha">Cancelar</button><button class="btn btn-primary" id="btn-salvar-ficha">Salvar Ficha</button></div></div></div>
 
-    <div id="modal-editar-ficha" class="modal"><div class="modal-content" style="max-width:600px"><div class="modal-header"><h2>Editar Ficha de Membro</h2><button id="btn-fechar-modal-editar-ficha" style="background:none;border:none;font-size:20px;cursor:pointer">&times;</button></div><div class="modal-body"><form id="form-editar-ficha"><input type="hidden" id="edit-ficha-id"><div class="form-group"><label>Ficha de Membro *</label><select id="edit-ficha-membro-select" class="form-control" required></select></div><div class="form-group"><label>Data de Cadastro</label><input type="text" id="edit-ficha-data-cadastro" class="form-control" required></div><div class="form-group"><label>Cadastrado Por</label><input type="text" id="edit-ficha-cadastrado-por" class="form-control" required></div></form></div><div class="modal-footer"><button class="btn" id="btn-cancelar-editar-ficha">Cancelar</button><button class="btn btn-primary" id="btn-salvar-edicao-ficha">Guardar Alterações</button></div></div></div>
-
+    <div id="modal-editar-ficha" class="modal">
+  <div class="modal-content" style="max-width:600px">
+    <div class="modal-header">
+      <h2>Editar Ficha de Membro</h2>
+      <button id="btn-fechar-modal-editar-ficha" style="background:none;border:none;font-size:20px;cursor:pointer">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="form-editar-ficha">
+        <input type="hidden" id="edit-ficha-id">
+        <div class="form-group">
+          <label>Ficha de Membro *</label>
+          <select id="edit-ficha-membro-select" class="form-control" required></select>
+        </div>
+        <div class="form-group">
+          <label>Data de Cadastro</label>
+          <input type="text" id="edit-ficha-data-cadastro" class="form-control" readonly>
+        </div>
+        <div class="form-group">
+          <label>Cadastrado Por</label>
+          <input type="text" id="edit-ficha-cadastrado-por" class="form-control" readonly>
+        </div>
+        <div class="form-group">
+          <label>Novo PDF (opcional)</label>
+          <input type="file" id="edit-ficha-pdf" class="form-control" accept=".pdf">
+          <small style="color:var(--gray)">Deixe em branco para manter o PDF atual.</small>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="btn-cancelar-editar-ficha">Cancelar</button>
+      <button class="btn btn-primary" id="btn-salvar-edicao-ficha">Guardar Alterações</button>
+    </div>
+  </div>
+</div>
+    
     <div id="modal-login" class="modal" style="display:flex;z-index:99999;background:rgba(0,0,0,0.95)"><div class="modal-content" style="max-width:450px;text-align:center;margin:20px"><div class="modal-header" style="border-bottom:none;padding:30px 20px 0"><div style="font-size:80px;color:var(--primary)">🔒</div><h2 style="color:var(--primary)">Acesso Restrito</h2><p style="color:var(--gray)">Departamento de Pessoal e Quadros - AGETRHA</p></div><div class="modal-body" style="padding:20px 30px 30px"><div class="form-group"><input type="password" id="login-password" class="form-control" placeholder="Digite a senha" autocomplete="off" style="padding:12px 15px;font-size:16px"></div><div id="login-error" style="color:var(--danger);margin-top:15px;display:none;background:rgba(220,53,69,0.1);padding:10px;border-radius:5px"><i class="fas fa-exclamation-triangle"></i> <span id="login-error-text">Senha incorreta!</span></div></div><div class="modal-footer" style="border-top:none;padding:0 30px 30px"><button class="btn btn-primary" id="btn-login" style="width:100%;padding:12px;font-size:16px"><i class="fas fa-sign-in-alt"></i> Entrar no Sistema</button></div></div></div>
 
     <div id="modal-welcome" class="modal" style="display:none"><div class="modal-content" style="max-width:400px;text-align:center"><div style="padding:40px 20px"><div style="font-size:60px;color:#28a745">🎉</div><h3 style="color:var(--primary)">Seja bem-vindo(a)!</h3><p style="color:var(--dark);font-size:16px">Ao painel de gestão de membros!</p></div><div class="modal-footer" style="justify-content:center;border-top:none;padding-top:0"><button class="btn btn-primary" id="btn-continuar-welcome" style="min-width:120px">Continuar</button></div></div></div>
@@ -452,9 +485,15 @@
             membersChart.update();
         }
 
-        // Fichas
-        async function carregarMembrosFicha() {
-  const sel = document.getElementById('ficha-membro-select');
+
+        // =====================
+// FUNÇÕES DE FICHAS DE MEMBRO
+// =====================
+
+// Carrega membros da planilha de origem e preenche dropdowns
+async function carregarMembrosFicha(selectElementId = 'ficha-membro-select') {
+  const sel = document.getElementById(selectElementId);
+  if (!sel) return;
   sel.innerHTML = '<option value="">Selecione um membro...</option>';
   try {
     const r = await fetch(`${FICHAS_SCRIPT_URL}?action=getMembrosOrigem`);
@@ -464,23 +503,62 @@
         const o = document.createElement('option');
         o.value = m.nome;
         o.textContent = m.nome;
-        o.dataset.dataCadastro = m.dataCadastro;
-        o.dataset.cadastradoPor = m.cadastradoPor;
+        // Guarda os dados nos datasets
+        o.dataset.dataCadastro = m.dataCadastro || '';
+        o.dataset.cadastradoPor = m.cadastradoPor || '';
         sel.appendChild(o);
       });
     }
-  } catch(e) { console.error(e); }
+  } catch(e) {
+    console.error('Erro ao carregar membros:', e);
+  }
 }
 
-        async function carregarTabelaFichas(filtro = '') {
+// Evento change do dropdown para preencher data e cadastrado por
+function setupFichaSelectListeners() {
+  const selects = ['ficha-membro-select', 'edit-ficha-membro-select'];
+  selects.forEach(id => {
+    const sel = document.getElementById(id);
+    if (sel) {
+      // Remove listeners antigos (para evitar duplicação)
+      sel.removeEventListener('change', handleFichaSelectChange);
+      sel.addEventListener('change', handleFichaSelectChange);
+    }
+  });
+}
+
+function handleFichaSelectChange(e) {
+  const opt = e.target.selectedOptions[0];
+  if (!opt || !opt.value) return;
+  
+  // Determina qual conjunto de campos preencher baseado no ID do select
+  let prefix = '';
+  if (e.target.id === 'edit-ficha-membro-select') {
+    prefix = 'edit-';
+  }
+  
+  const dataCadastro = opt.dataset.dataCadastro || '';
+  const cadastradoPor = opt.dataset.cadastradoPor || '';
+  
+  const campoData = document.getElementById(prefix + 'ficha-data-cadastro');
+  const campoCadastrado = document.getElementById(prefix + 'ficha-cadastrado-por');
+  
+  if (campoData) campoData.value = dataCadastro;
+  if (campoCadastrado) campoCadastrado.value = cadastradoPor;
+}
+
+// Carrega a tabela de fichas
+async function carregarTabelaFichas(filtro = '') {
   const tbody = document.getElementById('corpo-tabela-fichas');
-  tbody.innerHTML = '<tr><td colspan="4">Carregando...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="4">A carregar...</td></tr>';
   try {
     const r = await fetch(`${FICHAS_SCRIPT_URL}?action=getFichas`);
     const d = await r.json();
     if (!d.success) throw new Error(d.message);
-    let fichas = d.fichas;
-    if (filtro) fichas = fichas.filter(f => f.fichaMembro.toLowerCase().includes(filtro.toLowerCase()));
+    let fichas = d.fichas || [];
+    if (filtro) {
+      fichas = fichas.filter(f => f.fichaMembro.toLowerCase().includes(filtro.toLowerCase()));
+    }
     tbody.innerHTML = '';
     if (!fichas.length) {
       tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">Nenhuma ficha encontrada.</td></tr>';
@@ -503,51 +581,83 @@
   }
 }
 
-        async function salvarFicha() {
+// Salvar nova ficha
+async function salvarFicha() {
   const nomeMembro = document.getElementById('ficha-membro-select').value;
-  const pdf = document.getElementById('ficha-pdf').files[0];
-  if (!nomeMembro || !pdf) return alert('Preencha todos os campos obrigatórios.');
+  const pdfFile = document.getElementById('ficha-pdf').files[0];
+  if (!nomeMembro) return alert('Selecione um membro.');
+  if (!pdfFile) return alert('Selecione um ficheiro PDF.');
 
-  const base64 = await fileToBase64(pdf);
+  const base64 = await fileToBase64(pdfFile);
   const fd = new FormData();
   fd.append('action', 'saveFicha');
   fd.append('nomeMembro', nomeMembro);
   fd.append('dataCadastro', document.getElementById('ficha-data-cadastro').value);
   fd.append('cadastradoPor', document.getElementById('ficha-cadastrado-por').value);
   fd.append('pdfData', base64);
-  fd.append('pdfNome', pdf.name);
+  fd.append('pdfNome', pdfFile.name);
 
-  const r = await fetch(FICHAS_SCRIPT_URL, { method: 'POST', body: fd });
-  const res = await r.json();
-  if (res.success) {
-    alert('Ficha salva!');
-    document.getElementById('modal-adicionar-ficha').style.display = 'none';
-    carregarTabelaFichas();
-  } else {
-    alert('Erro: ' + res.message);
+  try {
+    const r = await fetch(FICHAS_SCRIPT_URL, { method: 'POST', body: fd });
+    const res = await r.json();
+    if (res.success) {
+      alert('Ficha guardada com sucesso!');
+      document.getElementById('modal-adicionar-ficha').style.display = 'none';
+      document.getElementById('form-ficha-membro').reset();
+      carregarTabelaFichas();
+    } else {
+      alert('Erro ao guardar: ' + (res.message || 'Erro desconhecido'));
+    }
+  } catch(e) {
+    alert('Erro de ligação: ' + e.message);
   }
 }
 
-        async function editarFicha(id) {
-  // Busca os dados completos da ficha
-  const r = await fetch(`${FICHAS_SCRIPT_URL}?action=getFichas`);
-  const d = await r.json();
-  const f = d.fichas.find(x => x.id === id);
-  if (!f) return alert('Ficha não encontrada');
-  document.getElementById('edit-ficha-id').value = f.id;
-  document.getElementById('edit-ficha-membro-select').value = f.fichaMembro;
-  document.getElementById('edit-ficha-data-cadastro').value = f.dataCadastro;
-  document.getElementById('edit-ficha-cadastrado-por').value = f.cadastradoPor;
-  // Carregar dropdown para edição (se necessário)
-  document.getElementById('modal-editar-ficha').style.display = 'flex';
+// Abrir edição: preenche dropdown e dados da ficha
+async function editarFicha(id) {
+  try {
+    // 1. Obter todas as fichas para achar a atual
+    const resp = await fetch(`${FICHAS_SCRIPT_URL}?action=getFichas`);
+    const dados = await resp.json();
+    if (!dados.success) throw new Error(dados.message);
+    const ficha = dados.fichas.find(f => f.id == id);
+    if (!ficha) return alert('Ficha não encontrada.');
+
+    // 2. Preencher dropdown com todos os membros (carrega do GAS)
+    const sel = document.getElementById('edit-ficha-membro-select');
+    sel.innerHTML = '<option value="">A carregar...</option>';
+    await carregarMembrosFicha('edit-ficha-membro-select');
+
+    // 3. Selecionar o membro atual e preencher campos
+    sel.value = ficha.fichaMembro;
+    // Dispara manualmente o change para preencher data/cadastrado (se existir no dataset)
+    const event = new Event('change');
+    sel.dispatchEvent(event);
+
+    // 4. Preencher campos adicionais com os dados atuais (caso o dataset não tenha)
+    //    (Opcional: garantir que os valores da ficha prevaleçam)
+    document.getElementById('edit-ficha-data-cadastro').value = ficha.dataCadastro;
+    document.getElementById('edit-ficha-cadastrado-por').value = ficha.cadastradoPor;
+    document.getElementById('edit-ficha-id').value = ficha.id;
+    // Limpar campo de arquivo
+    document.getElementById('edit-ficha-pdf').value = '';
+
+    // 5. Exibir modal
+    document.getElementById('modal-editar-ficha').style.display = 'flex';
+  } catch(e) {
+    alert('Erro ao carregar ficha: ' + e.message);
+  }
 }
 
+// Salvar edição da ficha
 async function salvarEdicaoFicha() {
   const id = document.getElementById('edit-ficha-id').value;
   const nomeMembro = document.getElementById('edit-ficha-membro-select').value;
   const dataCadastro = document.getElementById('edit-ficha-data-cadastro').value;
   const cadastradoPor = document.getElementById('edit-ficha-cadastrado-por').value;
-  const novoPdfInput = document.getElementById('edit-ficha-pdf'); // se adicionar campo de PDF
+  const pdfFile = document.getElementById('edit-ficha-pdf').files[0];
+
+  if (!nomeMembro) return alert('Selecione um membro.');
 
   const fd = new FormData();
   fd.append('action', 'updateFicha');
@@ -555,47 +665,49 @@ async function salvarEdicaoFicha() {
   fd.append('nomeMembro', nomeMembro);
   fd.append('dataCadastro', dataCadastro);
   fd.append('cadastradoPor', cadastradoPor);
-  if (novoPdfInput && novoPdfInput.files.length) {
-    fd.append('pdfData', await fileToBase64(novoPdfInput.files[0]));
-    fd.append('pdfNome', novoPdfInput.files[0].name);
+  if (pdfFile) {
+    const base64 = await fileToBase64(pdfFile);
+    fd.append('pdfData', base64);
+    fd.append('pdfNome', pdfFile.name);
   }
 
-  const r = await fetch(FICHAS_SCRIPT_URL, { method: 'POST', body: fd });
-  const res = await r.json();
-  if (res.success) {
-    alert('Ficha atualizada!');
-    document.getElementById('modal-editar-ficha').style.display = 'none';
-    carregarTabelaFichas();
-  } else {
-    alert('Erro: ' + res.message);
+  try {
+    const r = await fetch(FICHAS_SCRIPT_URL, { method: 'POST', body: fd });
+    const res = await r.json();
+    if (res.success) {
+      alert('Ficha atualizada!');
+      document.getElementById('modal-editar-ficha').style.display = 'none';
+      carregarTabelaFichas();
+    } else {
+      alert('Erro: ' + (res.message || 'Desconhecido'));
+    }
+  } catch(e) {
+    alert('Erro de ligação: ' + e.message);
   }
 }
 
+// Excluir ficha
 async function excluirFicha(id) {
-  if (!confirm('Tem certeza que deseja excluir esta ficha?')) return;
+  if (!confirm('Eliminar esta ficha permanentemente?')) return;
   const fd = new FormData();
   fd.append('action', 'deleteFicha');
   fd.append('id', id);
-  const r = await fetch(FICHAS_SCRIPT_URL, { method: 'POST', body: fd });
-  const res = await r.json();
-  if (res.success) {
-    alert('Ficha excluída!');
-    carregarTabelaFichas();
-  } else {
-    alert('Erro: ' + res.message);
+  try {
+    const r = await fetch(FICHAS_SCRIPT_URL, { method: 'POST', body: fd });
+    const res = await r.json();
+    if (res.success) {
+      alert('Ficha eliminada.');
+      carregarTabelaFichas();
+    } else {
+      alert('Erro: ' + (res.message || ''));
+    }
+  } catch(e) {
+    alert('Erro de ligação: ' + e.message);
   }
 }
-        
 
-        function salvarEdicaoFicha() {
-            const id = document.getElementById('edit-ficha-id').value;
-            const idx = fichasMembro.findIndex(f=>f.id===id);
-            if(idx>-1) { fichasMembro[idx].dataCadastro=document.getElementById('edit-ficha-data-cadastro').value; fichasMembro[idx].cadastradoPor=document.getElementById('edit-ficha-cadastrado-por').value; localStorage.setItem('fichasMembro',JSON.stringify(fichasMembro)); carregarTabelaFichas(); }
-            document.getElementById('modal-editar-ficha').style.display='none';
-        }
-
-        // Projectos
-        function inicializarGraficosProjectos() {
+  // Projectos
+  function inicializarGraficosProjectos() {
             if(statusChart) statusChart.destroy(); if(progressChart) progressChart.destroy();
             statusChart = new Chart(document.getElementById('statusChart'), { type:'doughnut', data:{labels:['Planeamento','Em Execução','Concluídos','Suspensos'],datasets:[{data:[0,0,0,0],backgroundColor:['#FFA500','#87CEEB','#28a745','#8B0000']}]}, options:{maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:11},padding:15}}}} });
             progressChart = new Chart(document.getElementById('progressChart'), { type:'bar', data:{labels:['Planeamento','Em Execução','Concluídos','Suspensos'],datasets:[{label:'Nº de Projectos',data:[0,0,0,0],backgroundColor:['#FFA500','#87CEEB','#28a745','#8B0000']}]}, options:{maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}} });
@@ -988,22 +1100,48 @@ async function excluirFicha(id) {
             document.getElementById('btn-fechar-ver-projecto').addEventListener('click', ()=>document.getElementById('modal-ver-projecto').style.display='none');
             document.getElementById('btn-aplicar-filtros-projectos').addEventListener('click', ()=>{ aplicarFiltrosProjectos(); carregarTabelaProjectos(); });
 
-            // Fichas
-            document.getElementById('btn-adicionar-ficha').addEventListener('click', ()=>{ document.getElementById('modal-adicionar-ficha').style.display='flex'; carregarMembrosFicha(); });
-            document.getElementById('btn-fechar-modal-ficha').addEventListener('click', ()=>document.getElementById('modal-adicionar-ficha').style.display='none');
-            document.getElementById('btn-cancelar-ficha').addEventListener('click', ()=>{ document.getElementById('modal-adicionar-ficha').style.display='none'; document.getElementById('form-ficha-membro').reset(); });
-            document.getElementById('btn-salvar-ficha').addEventListener('click', salvarFicha);
-            document.getElementById('btn-filtrar-fichas').addEventListener('click', ()=>carregarTabelaFichas(document.getElementById('filter-nome-ficha').value));
-            document.getElementById('btn-fechar-modal-editar-ficha').addEventListener('click', ()=>document.getElementById('modal-editar-ficha').style.display='none');
-            document.getElementById('btn-cancelar-editar-ficha').addEventListener('click', ()=>document.getElementById('modal-editar-ficha').style.display='none');
-            document.getElementById('btn-salvar-edicao-ficha').addEventListener('click', salvarEdicaoFicha);
-            document.getElementById('ficha-membro-select').addEventListener('change', function(){ 
-    const opt=this.selectedOptions[0]; 
-    if(opt&&opt.value){ 
-        document.getElementById('ficha-data-cadastro').value=opt.dataset.dataAdmissao?formatarData(opt.dataset.dataAdmissao):''; 
-        document.getElementById('ficha-cadastrado-por').value = opt.dataset.cadastradoPor || 'Administrador'; 
-    } 
+            // =====================
+// FICHAS DE MEMBRO - LISTENERS
+// =====================
+
+// Botão Adicionar Ficha
+document.getElementById('btn-adicionar-ficha').addEventListener('click', () => {
+  document.getElementById('modal-adicionar-ficha').style.display = 'flex';
+  carregarMembrosFicha('ficha-membro-select');
+  // limpar campos anteriores
+  document.getElementById('ficha-data-cadastro').value = '';
+  document.getElementById('ficha-cadastrado-por').value = '';
+  document.getElementById('ficha-pdf').value = '';
 });
+
+// Fechar modal de adição
+document.getElementById('btn-fechar-modal-ficha').addEventListener('click', () => {
+  document.getElementById('modal-adicionar-ficha').style.display = 'none';
+});
+document.getElementById('btn-cancelar-ficha').addEventListener('click', () => {
+  document.getElementById('modal-adicionar-ficha').style.display = 'none';
+  document.getElementById('form-ficha-membro').reset();
+});
+
+// Salvar nova ficha
+document.getElementById('btn-salvar-ficha').addEventListener('click', salvarFicha);
+
+// Filtrar fichas
+document.getElementById('btn-filtrar-fichas').addEventListener('click', () => {
+  carregarTabelaFichas(document.getElementById('filter-nome-ficha').value);
+});
+
+// Modal Editar Ficha
+document.getElementById('btn-fechar-modal-editar-ficha').addEventListener('click', () => {
+  document.getElementById('modal-editar-ficha').style.display = 'none';
+});
+document.getElementById('btn-cancelar-editar-ficha').addEventListener('click', () => {
+  document.getElementById('modal-editar-ficha').style.display = 'none';
+});
+document.getElementById('btn-salvar-edicao-ficha').addEventListener('click', salvarEdicaoFicha);
+
+// Configurar os eventos "change" dos dois dropdowns (adição e edição)
+setupFichaSelectListeners();
 
             carregarConfiguracoesIniciais();
         });
