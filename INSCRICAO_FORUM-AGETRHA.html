@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FORMULÁRIO DE INSCRIÇÃO DO FÓRUM – AGETRHA</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: rgb(1, 15, 60);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ========== TELA DE BOAS-VINDAS ========== */
+        #welcomeScreen {
+            background: rgb(1, 15, 60);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #welcomeScreen h2 {
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 20px;
+            line-height: 1.3;
+        }
+
+        #welcomeScreen p {
+            margin-bottom: 30px;
+            font-size: 16px;
+            line-height: 1.5;
+            color: #ccc;
+        }
+
+        #enterButton {
+            background-color: #fff;
+            color: rgb(1, 15, 60);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        #enterButton:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* ========== CONTEÚDO PRINCIPAL ========== */
+        .container {
+            max-width: 700px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: rgb(1, 15, 60);
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            position: relative;
+            display: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* ========== CABEÇALHO ========== */
+        .header {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            min-height: 130px;
+        }
+
+        .header img.header-left {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 130px;
+            height: auto;
+            border-radius: 5px;
+        }
+
+        .header img.header-right {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 130px;
+            height: auto;
+            border-radius: 5px;
+        }
+
+        .header-content {
+            flex: 1;
+            padding-left: 150px;
+            padding-right: 150px;
+        }
+
+        .header h1 {
+            color: #fff;
+            margin-bottom: 8px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            line-height: 1.3;
+        }
+
+        .header h2 {
+            color: #fff;
+            font-size: 16px;
+            margin-top: 0;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        .header p {
+            color: #ccc;
+            margin-top: 5px;
+            font-size: 13px;
+        }
+
+        /* ========== SEÇÕES ========== */
+        .section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: #fff;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #ddd;
+            font-size: 15px;
+        }
+
+        .required::after {
+            content: " *";
+            color: #ff6b6b;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="email"],
+        input[type="tel"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #fff;
+            border-radius: 4px;
+            font-size: 15px;
+            transition: border 0.3s;
+            background-color: #fff;
+            color: #333;
+        }
+
+        input[type="text"]:focus,
+        input[type="date"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus {
+            border-color: #fff;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+        }
+
+        .locked-field {
+            background-color: #fff !important;
+            border: 1px solid #fff !important;
+            color: #495057 !important;
+            cursor: not-allowed !important;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 5px;
+            flex-wrap: wrap;
+        }
+
+        .radio-group label {
+            font-weight: normal;
+            margin-left: 5px;
+            cursor: pointer;
+            color: #ddd;
+            font-size: 15px;
+        }
+
+        .radio-group input[type="radio"] {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: #fff;
+        }
+
+        /* ========== BOTÕES ========== */
+        .buttons {
+            text-align: center;
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background-color: #fff;
+            color: rgb(1, 15, 60);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            background-color: #f0f0f0;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .member-number {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 18px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            word-break: break-word;
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .success-message {
+            color: #90ee90;
+            font-size: 16px;
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: rgba(144, 238, 144, 0.1);
+            border-radius: 5px;
+            display: none;
+            border: 1px solid #90ee90;
+        }
+
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        /* ==================== RESPONSIVIDADE ==================== */
+
+        /* Tablets grandes e ecrãs médios (até 1024px) */
+        @media (max-width: 1024px) {
+            .container {
+                max-width: 90%;
+            }
+
+            .header-content {
+                padding-left: 140px;
+                padding-right: 140px;
+            }
+
+            .header img.header-left,
+            .header img.header-right {
+                width: 110px;
+            }
+
+            .header h1 {
+                font-size: 18px;
+            }
+
+            .header h2 {
+                font-size: 14px;
+            }
+        }
+
+        /* Tablets (até 768px) */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                align-items: flex-start;
+                padding-top: 20px;
+            }
+
+            .container {
+                padding: 20px;
+                max-width: 100%;
+                border-radius: 8px;
+            }
+
+            #welcomeScreen {
+                padding: 25px;
+                max-width: 100%;
+            }
+
+            #welcomeScreen h2 {
+                font-size: 18px;
+            }
+
+            .header {
+                flex-direction: column;
+                min-height: auto;
+                align-items: center;
+                text-align: center;
+                padding-bottom: 15px;
+                margin-bottom: 20px;
+            }
+
+            .header img.header-left,
+            .header img.header-right {
+                position: static;
+                width: 100px;
+                margin: 0 0 15px 0;
+                display: block;
+            }
+
+            .header img.header-left {
+                order: 1;
+            }
+
+            /* Esconde o logotipo da AGETRHA em smartphones/tablets */
+    .header img.header-right {
+        display: none;
+    }
+
+            .header-content {
+                order: 3;
+                padding-left: 0;
+                padding-right: 0;
+            }
+
+            .header h1 {
+                font-size: 18px;
+                justify-content: center;
+            }
+
+            .header h2 {
+                font-size: 14px;
+            }
+
+            .header p {
+                font-size: 12px;
+            }
+
+            .section {
+                padding: 15px;
+                border-left-width: 3px;
+            }
+
+            .section-title {
+                font-size: 16px;
+            }
+
+            label {
+                font-size: 14px;
+            }
+
+            input[type="text"],
+            input[type="date"],
+            input[type="email"],
+            input[type="tel"] {
+                font-size: 14px;
+                padding: 8px;
+            }
+
+            .radio-group {
+                gap: 15px;
+            }
+
+            .radio-group label {
+                font-size: 14px;
+            }
+
+            .buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            button {
+                width: 100%;
+                padding: 10px 20px;
+                font-size: 15px;
+            }
+
+            .member-number {
+                font-size: 16px;
+                padding: 8px 12px;
+            }
+
+            .success-message {
+                font-size: 14px;
+                padding: 8px;
+            }
+        }
+
+        /* Smartphones (até 480px) */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+                padding-top: 10px;
+            }
+
+            .container {
+                padding: 15px;
+                border-radius: 6px;
+            }
+
+            #welcomeScreen {
+                padding: 20px 15px;
+                border-radius: 8px;
+            }
+
+            #welcomeScreen h2 {
+                font-size: 16px;
+            }
+
+            #welcomeScreen p {
+                font-size: 14px;
+            }
+
+            #enterButton {
+                font-size: 14px;
+                padding: 10px 20px;
+            }
+
+            .header {
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+            }
+
+            .header img.header-left,
+            .header img.header-right {
+                width: 80px;
+                margin-bottom: 10px;
+            }
+
+            .header h1 {
+                font-size: 16px;
+            }
+
+            .header h2 {
+                font-size: 13px;
+            }
+
+            .header p {
+                font-size: 11px;
+            }
+
+            .section {
+                padding: 12px;
+                margin-bottom: 15px;
+            }
+
+            .section-title {
+                font-size: 15px;
+                margin-bottom: 10px;
+            }
+
+            .form-group {
+                margin-bottom: 10px;
+            }
+
+            label {
+                font-size: 13px;
+            }
+
+            input[type="text"],
+            input[type="date"],
+            input[type="email"],
+            input[type="tel"] {
+                font-size: 13px;
+                padding: 7px;
+            }
+
+            .radio-group {
+                gap: 10px;
+            }
+
+            .radio-group input[type="radio"] {
+                width: 16px;
+                height: 16px;
+            }
+
+            .radio-group label {
+                font-size: 13px;
+            }
+
+            button {
+                font-size: 14px;
+                padding: 10px 15px;
+            }
+
+            .member-number {
+                font-size: 14px;
+                padding: 6px 10px;
+            }
+
+            .success-message {
+                font-size: 13px;
+                padding: 6px;
+            }
+        }
+
+        /* ==================== IMPRESSÃO / PDF ==================== */
+        @media print {
+            @page {
+                margin: 0.5cm;
+                size: A4;
+            }
+            body {
+                background: #fff !important;
+                padding: 0;
+                margin: 0;
+                font-size: 12pt;
+                line-height: 1.4;
+                color: #000;
+            }
+            .container {
+                box-shadow: none;
+                padding: 15px;
+                max-width: 100%;
+                margin: 0;
+                border: none;
+                background: #fff !important;
+                color: #000;
+            }
+            .buttons,
+            .file-input,
+            .error-message,
+            .success-message {
+                display: none !important;
+            }
+            .member-number {
+                background-color: rgb(1, 15, 60) !important;
+                color: #fff !important;
+                -webkit-print-color-adjust: exact;
+                color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .section {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                margin-bottom: 20px;
+                padding: 15px;
+                border-left: 4px solid rgb(1, 15, 60);
+                background-color: #f9fafc;
+                box-shadow: none;
+            }
+            .header {
+                display: block;
+                position: relative;
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+                min-height: 100px;
+                border-bottom: 3px solid rgb(1, 15, 60);
+            }
+            .header img.header-left {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100px;
+            }
+            .header img.header-right {
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 100px;
+            }
+            .header-content {
+                padding-left: 110px;
+                padding-right: 110px;
+                color: #000;
+            }
+            .header h1,
+            .header h2,
+            .header p {
+                color: #000 !important;
+            }
+            .section-title {
+                color: rgb(1, 15, 60) !important;
+            }
+            label {
+                color: #000 !important;
+            }
+            .radio-group label {
+                color: #000 !important;
+            }
+            input[type="text"],
+            input[type="date"],
+            input[type="email"],
+            input[type="tel"] {
+                padding: 6px 8px;
+                font-size: 11pt;
+                border: 1px solid #999;
+                background: white;
+                color: #000;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Tela de boas-vindas -->
+    <div id="welcomeScreen">
+        <h2>FORMULÁRIO DE INSCRIÇÃO</h2>
+        <h2>1.º FÓRUM DE GESTORES E TÉCNICOS DE RECURSOS HUMANOS DE ANGOLA</h2>
+        <p>Preencha o Formulário para se inscrever-se ao Fórum. Vagas Limitadas</p>
+        <button id="enterButton">ENTRAR</button>
+    </div>
+
+    <!-- Conteúdo principal (inicialmente oculto) -->
+    <div class="container" id="mainContent">
+
+        <div class="header">
+            <!-- Imagem do Google Drive (thumbnail) no canto superior ESQUERDO -->
+            <img class="header-left" src="https://drive.google.com/thumbnail?id=175eeVBQfvPjNqJxlWIxQKKprJzq79ERw&sz=w500" alt="Ficheiro AGETRHA">
+
+            <!-- Logotipo original no canto superior DIREITO -->
+            <img class="header-right" src="https://drive.google.com/thumbnail?id=1UsOKh3Gvd-br6w3KTesth08sgBqjCPEX&sz=w500" alt="Logotipo-BRANCO">
+            <div class="header-content">
+                <h1>FORMULÁRIO DE INSCRIÇÃO</h1>
+                <h2>Associação dos Gestores e Técnicos de Recursos Humanos de Angola</h2>
+                <p><strong>LOCAL:</strong> Arquivo Nacional, Luanda | DATA: 27/09/2026 HORÁRIO: 9H</p>
+            </div>
+        </div>
+
+        <form id="memberForm">
+            <div class="member-number" id="memberNumberDisplay">
+                Código de inscrição: <span id="memberNumber">A ser gerado pelo sistema...</span>
+            </div>
+
+            <div class="section">
+                <div class="section-title">🔹 DADOS DO(A) PARTICIPANTE</div>
+
+                <div class="form-group">
+                    <label for="nome" class="required">Nome Completo:</label>
+                    <input type="text" id="nome" name="nome" required>
+                    <div class="error-message" id="nomeError">Este campo é obrigatório</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">E-mail:</label>
+                    <input type="email" id="email" name="email">
+                </div>
+
+                <div class="form-group">
+                    <label for="telefone" class="required">Telefone/Whatsapp:</label>
+                    <input type="tel" id="telefone" name="telefone" pattern="[0-9]{9,}" title="Apenas números, mínimo 9 dígitos" required>
+                    <div class="error-message" id="telefoneError">Campo obrigatório (apenas números)</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="empresa">Empresa/Organização:</label>
+                    <input type="text" id="empresa" name="empresa">
+                </div>
+
+                <div class="form-group">
+                    <label for="cargo">Cargo/Função:</label>
+                    <input type="text" id="cargo" name="cargo">
+                </div>
+
+                <div class="form-group">
+                    <label class="required">Estudante de Gestão de RH?</label>
+                    <div class="radio-group">
+                        <input type="radio" id="estudante_sim" name="estudante_rh" value="Sim" required>
+                        <label for="estudante_sim">Sim</label>
+                        <input type="radio" id="estudante_nao" name="estudante_rh" value="Não" required>
+                        <label for="estudante_nao">Não</label>
+                    </div>
+                    <div class="error-message" id="estudanteError">Selecione uma opção</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="data_inscricao">Data de Inscrição:</label>
+                    <input type="date" id="data_inscricao" name="data_inscricao" class="locked-field" readonly>
+                </div>
+            </div>
+
+            <div class="success-message" id="successMessage">
+                <strong>INSCRIÇÃO FEITA COM SUCESSO! A equipa AGETRHA entrará em contacto.</strong>
+            </div>
+
+            <div class="buttons">
+                <button type="button" id="btnCadastrar">
+                    <span>✓</span> ENVIAR CANDIDATURA
+                </button>
+                <button type="button" id="btnPDF">
+                    <span>📄</span> Gerar PDF
+                </button>
+                <button type="button" id="btnLimpar">
+                    <span>🗑️</span> Limpar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // URL do Google Apps Script (substitua pela sua se necessário)
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwl2lT8C4SzZUJbryqZwqsRlFtynkp6lxqcZxP80hRyj9oMV66F7QEYaOWLfUMqmMQV/exec';
+
+        // Elementos DOM
+        const welcomeScreen = document.getElementById('welcomeScreen');
+        const enterButton = document.getElementById('enterButton');
+        const mainContent = document.getElementById('mainContent');
+        const successMessage = document.getElementById('successMessage');
+        const memberNumber = document.getElementById('memberNumber');
+        const dataInscricaoField = document.getElementById('data_inscricao');
+
+        // Data atual
+        function setCurrentDate() {
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            dataInscricaoField.value = formattedDate;
+        }
+
+        // Entrar no formulário
+        enterButton.addEventListener('click', function() {
+            welcomeScreen.style.display = 'none';
+            mainContent.style.display = 'block';
+            memberNumber.textContent = "A ser gerado pelo sistema...";
+            setCurrentDate();
+        });
+
+        // Validação (apenas campos obrigatórios: nome, telefone, estudante)
+        function validarFormulario() {
+            let valido = true;
+
+            // Nome
+            const nome = document.getElementById('nome');
+            const nomeError = document.getElementById('nomeError');
+            if (!nome.value.trim()) {
+                nome.style.borderColor = '#ff6b6b';
+                nomeError.style.display = 'block';
+                valido = false;
+            } else {
+                nome.style.borderColor = '#fff';
+                nomeError.style.display = 'none';
+            }
+
+            // Telefone
+            const telefone = document.getElementById('telefone');
+            const telefoneError = document.getElementById('telefoneError');
+            if (!telefone.value || !/^\d{9,}$/.test(telefone.value)) {
+                telefone.style.borderColor = '#ff6b6b';
+                telefoneError.style.display = 'block';
+                valido = false;
+            } else {
+                telefone.style.borderColor = '#fff';
+                telefoneError.style.display = 'none';
+            }
+
+            // Estudante RH
+            const estudanteSelecionado = document.querySelector('input[name="estudante_rh"]:checked');
+            const estudanteError = document.getElementById('estudanteError');
+            if (!estudanteSelecionado) {
+                estudanteError.style.display = 'block';
+                valido = false;
+            } else {
+                estudanteError.style.display = 'none';
+            }
+
+            return valido;
+        }
+
+        // Coletar dados do formulário
+        function coletarDadosFormulario() {
+            return {
+                nome: document.getElementById('nome').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                telefone: document.getElementById('telefone').value.trim(),
+                empresa: document.getElementById('empresa').value.trim(),
+                cargo: document.getElementById('cargo').value.trim(),
+                data_inscricao: document.getElementById('data_inscricao').value,
+                estudante_rh: document.querySelector('input[name="estudante_rh"]:checked')?.value || '',
+                action: 'addMember'
+            };
+        }
+
+        // Envio para Google Sheets
+        async function enviarParaGoogleSheets(dados) {
+            const params = new URLSearchParams(dados);
+            const response = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params.toString()
+            });
+            if (!response.ok) throw new Error('Erro na rede');
+            return await response.json();
+        }
+
+        // Botão Enviar
+        document.getElementById('btnCadastrar').addEventListener('click', async function() {
+            if (!validarFormulario()) {
+                alert('Por favor, preencha os campos obrigatórios corretamente.');
+                return;
+            }
+
+            const btn = this;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<span>⏳</span> Enviando...';
+            btn.disabled = true;
+            document.body.classList.add('loading');
+
+            try {
+                const dados = coletarDadosFormulario();
+                const resultado = await enviarParaGoogleSheets(dados);
+
+                if (resultado.success) {
+                    successMessage.style.display = 'block';
+                    if (resultado.data && resultado.data.numeroMembro) {
+                        memberNumber.textContent = resultado.data.numeroMembro;
+                    }
+                    successMessage.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    throw new Error(resultado.message || 'Erro desconhecido');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Erro ao enviar: ' + error.message);
+            } finally {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+                document.body.classList.remove('loading');
+            }
+        });
+
+        // PDF
+        document.getElementById('btnPDF').addEventListener('click', function() {
+            if (validarFormulario()) {
+                window.print();
+            } else {
+                alert('Preencha os campos obrigatórios antes de gerar o PDF.');
+            }
+        });
+
+        // Limpar
+        document.getElementById('btnLimpar').addEventListener('click', function() {
+            if (confirm('Tem certeza que deseja limpar todos os campos?')) {
+                document.getElementById('memberForm').reset();
+                successMessage.style.display = 'none';
+                document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('input[type="text"], input[type="tel"], input[type="email"]').forEach(input => {
+                    input.style.borderColor = '#fff';
+                });
+                memberNumber.textContent = "A ser gerado pelo sistema...";
+                setCurrentDate();
+            }
+        });
+
+        // Validações em tempo real
+        document.getElementById('nome').addEventListener('blur', function() {
+            if (!this.value.trim()) {
+                this.style.borderColor = '#ff6b6b';
+                document.getElementById('nomeError').style.display = 'block';
+            } else {
+                this.style.borderColor = '#fff';
+                document.getElementById('nomeError').style.display = 'none';
+            }
+        });
+
+        document.getElementById('telefone').addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '');
+            const telError = document.getElementById('telefoneError');
+            if (!this.value || !/^\d{9,}$/.test(this.value)) {
+                this.style.borderColor = '#ff6b6b';
+                telError.style.display = 'block';
+            } else {
+                this.style.borderColor = '#fff';
+                telError.style.display = 'none';
+            }
+        });
+
+        document.querySelectorAll('input[name="estudante_rh"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.getElementById('estudanteError').style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
