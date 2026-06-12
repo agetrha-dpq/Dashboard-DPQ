@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard AGETRHA · Gestão de Inscrições</title>
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg: rgb(1, 15, 60);
+            --surface: rgba(255, 255, 255, 0.06);
+            --surface-hover: rgba(255, 255, 255, 0.1);
+            --border: rgba(255, 255, 255, 0.2);
+            --accent: #ffffff;
+            --text: #ffffff;
+            --text-secondary: #cccccc;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            --radius: 12px;
+            --transition: 0.25s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .dashboard {
+            width: 100%;
+            max-width: 1300px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        /* ----- CABEÇALHO COM LOGOTIPOS ----- */
+        .dashboard-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0;
+            border-bottom: 2px solid var(--border);
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-logo {
+            width: 110px;
+            height: auto;
+            border-radius: 8px;
+            transition: transform var(--transition);
+        }
+        .header-logo:hover {
+            transform: scale(1.05);
+        }
+
+        .header-title {
+            flex: 1;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .header-title h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+            color: var(--accent);
+        }
+
+        .header-title p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* ----- MÉTRICAS (CARDS) ----- */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .metric-card {
+            background: var(--surface);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px 20px;
+            text-align: center;
+            transition: all var(--transition);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .metric-card:hover {
+            background: var(--surface-hover);
+            transform: translateY(-3px);
+            border-color: rgba(255,255,255,0.4);
+        }
+
+        .metric-icon {
+            font-size: 2rem;
+            opacity: 0.9;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-secondary);
+        }
+
+        .metric-value {
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1;
+        }
+
+        .metric-sub {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* ----- GRÁFICO (Chart.js) ----- */
+        .chart-section {
+            background: var(--surface);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--accent);
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-height: 300px;
+            margin: 0 auto;
+        }
+
+        /* ----- LISTA DE CANDIDATURAS ----- */
+        .candidates-section {
+            background: var(--surface);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: var(--shadow);
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filters input,
+        .filters select {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 14px;
+            color: var(--text);
+            outline: none;
+            transition: border var(--transition);
+            min-width: 200px;
+            backdrop-filter: blur(4px);
+        }
+
+        .filters input::placeholder {
+            color: #aaa;
+        }
+        .filters input:focus,
+        .filters select:focus {
+            border-color: var(--accent);
+            background: rgba(255,255,255,0.15);
+        }
+        .filters select option {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .candidates-list {
+            max-height: 600px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-right: 4px;
+        }
+
+        .candidate-item {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            transition: all var(--transition);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .candidate-item:hover {
+            background: rgba(255,255,255,0.12);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-1px);
+        }
+
+        .candidate-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .candidate-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .candidate-code {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .status-recebida { background: #3498db; color: #fff; }
+        .status-contactada { background: #f39c12; color: #000; }
+        .status-aprovada { background: #27ae60; color: #fff; }
+        .status-arquivada { background: #7f8c8d; color: #fff; }
+
+        .candidate-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 8px 20px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .candidate-details div strong {
+            color: var(--accent);
+            margin-right: 4px;
+        }
+
+        .candidate-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .status-select {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 13px;
+            color: var(--text);
+            cursor: pointer;
+            outline: none;
+            transition: border var(--transition);
+        }
+
+        .status-select:focus {
+            border-color: var(--accent);
+        }
+
+        .export-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .export-btn:hover {
+            background: rgba(255,255,255,0.3);
+            border-color: var(--accent);
+        }
+
+        /* ----- LOADING ----- */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 50px;
+            color: var(--text-secondary);
+            gap: 16px;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255,255,255,0.2);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ----- RESPONSIVO ----- */
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            .header-logo {
+                width: 90px;
+            }
+            .filters {
+                flex-direction: column;
+            }
+            .candidate-details {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- CABEÇALHO COM LOGOTIPOS -->
+        <header class="dashboard-header">
+            <img class="header-logo" src="https://drive.google.com/thumbnail?id=175eeVBQfvPjNqJxlWIxQKKprJzq79ERw&sz=w500" alt="AGETRHA Logo 1">
+            <div class="header-title">
+                <h1>Dashboard AGETRHA</h1>
+                <p>Gestão de Inscrições · 1.º Fórum de RH</p>
+            </div>
+            <img class="header-logo" src="https://drive.google.com/thumbnail?id=1UsOKh3Gvd-br6w3KTesth08sgBqjCPEX&sz=w500" alt="AGETRHA Logo 2">
+        </header>
+
+        <!-- CARDS DE MÉTRICAS -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon">👥</div>
+                <div class="metric-label">Total de Inscrições</div>
+                <div class="metric-value" id="totalCandidaturas">0</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">📅</div>
+                <div class="metric-label">Novas Este Mês</div>
+                <div class="metric-value" id="novasEsteMes">0</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">⏳</div>
+                <div class="metric-label">Pendentes</div>
+                <div class="metric-value" id="candidaturasPendentes">0</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-icon">📈</div>
+                <div class="metric-label">Taxa de Contacto</div>
+                <div class="metric-value" id="taxaContacto">0%</div>
+                <div class="metric-sub">contactadas + aprovadas</div>
+            </div>
+        </div>
+
+        <!-- GRÁFICO DE STATUS (Chart.js) -->
+        <div class="chart-section">
+            <div class="section-title">📊 Distribuição por Status</div>
+            <div class="chart-container">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+
+        <!-- LISTA DE CANDIDATURAS -->
+        <div class="candidates-section">
+            <div class="section-title">📋 Candidaturas Individuais</div>
+            <div class="filters">
+                <input type="text" id="searchInput" placeholder="🔍 Nome, código ou email...">
+                <select id="statusFilter">
+                    <option value="">Todos os status</option>
+                    <option value="Recebida">Recebida</option>
+                    <option value="Contactada">Contactada</option>
+                    <option value="Aprovada">Aprovada</option>
+                    <option value="Arquivada">Arquivada</option>
+                </select>
+                <select id="estudanteFilter">
+                    <option value="">Todos os perfis</option>
+                    <option value="Sim">Estudante de RH</option>
+                    <option value="Não">Não estudante</option>
+                </select>
+            </div>
+
+            <div class="loading" id="loadingCandidates" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>A carregar candidaturas…</p>
+            </div>
+
+            <div id="candidaturasList" class="candidates-list"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configuração do Google Apps Script
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwl2lT8C4SzZUJbryqZwqsRlFtynkp6lxqcZxP80hRyj9oMV66F7QEYaOWLfUMqmMQV/exec';
+        
+        // Elementos DOM
+        const totalCandidaturasEl = document.getElementById('totalCandidaturas');
+        const novasEsteMesEl = document.getElementById('novasEsteMes');
+        const candidaturasPendentesEl = document.getElementById('candidaturasPendentes');
+        const taxaContactoEl = document.getElementById('taxaContacto');
+        const candidaturasListEl = document.getElementById('candidaturasList');
+        const loadingEl = document.getElementById('loadingCandidates');
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const estudanteFilter = document.getElementById('estudanteFilter');
+        
+        let todasCandidaturas = [];
+        let statusChart = null;
+
+        // Inicialização
+        carregarDashboard();
+
+        // ==================== FUNÇÕES DE DADOS ====================
+        async function carregarDashboard() {
+            loadingEl.style.display = 'flex';
+            candidaturasListEl.innerHTML = '';
+            
+            try {
+                const [candidaturas, stats] = await Promise.all([
+                    obterCandidaturas(),
+                    obterEstatisticas()
+                ]);
+                
+                todasCandidaturas = candidaturas;
+                atualizarMetricas(stats);
+                atualizarGrafico(stats.porStatus);
+                aplicarFiltros();
+            } catch (error) {
+                console.error('Erro ao carregar dashboard:', error);
+                alert('Erro ao carregar dados. Verifique a conexão.');
+            } finally {
+                loadingEl.style.display = 'none';
+            }
+        }
+
+        async function obterCandidaturas() {
+            const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getCandidates`);
+            const result = await response.json();
+            if (result.success) return result.candidates;
+            throw new Error(result.message);
+        }
+
+        async function obterEstatisticas() {
+            const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getDashboardStats`);
+            const result = await response.json();
+            if (result.success) return result.stats;
+            throw new Error(result.message);
+        }
+
+        // ==================== MÉTRICAS ====================
+        function atualizarMetricas(stats) {
+            totalCandidaturasEl.textContent = stats.total;
+            novasEsteMesEl.textContent = stats.esteMes;
+            const pendentes = stats.porStatus['Recebida'] || 0;
+            candidaturasPendentesEl.textContent = pendentes;
+            
+            const contactadas = stats.porStatus['Contactada'] || 0;
+            const aprovadas = stats.porStatus['Aprovada'] || 0;
+            const taxa = stats.total > 0 
+                ? Math.round(((contactadas + aprovadas) / stats.total) * 100) 
+                : 0;
+            taxaContactoEl.textContent = taxa + '%';
+        }
+
+        // ==================== GRÁFICO (Chart.js) ====================
+        function atualizarGrafico(porStatus) {
+            const ctx = document.getElementById('statusChart').getContext('2d');
+            const labels = ['Recebida', 'Contactada', 'Aprovada', 'Arquivada'];
+            const dados = labels.map(status => porStatus[status] || 0);
+            const backgroundColors = ['#3498db', '#f39c12', '#27ae60', '#95a5a6'];
+            
+            if (statusChart) {
+                statusChart.data.datasets[0].data = dados;
+                statusChart.update();
+            } else {
+                statusChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'N.º de Candidatos',
+                            data: dados,
+                            backgroundColor: backgroundColors,
+                            borderColor: 'rgba(255,255,255,0.8)',
+                            borderWidth: 1,
+                            borderRadius: 8,
+                            barThickness: 50,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(0,0,0,0.8)',
+                                titleColor: '#fff',
+                                bodyColor: '#fff'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { color: '#ccc', stepSize: 1 },
+                                grid: { color: 'rgba(255,255,255,0.1)' }
+                            },
+                            x: {
+                                ticks: { color: '#ccc' },
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // ==================== LISTA DE CANDIDATOS ====================
+        function atualizarListaCandidaturas(candidaturas) {
+            candidaturasListEl.innerHTML = '';
+            if (candidaturas.length === 0) {
+                candidaturasListEl.innerHTML = `
+                    <div style="text-align:center; padding:40px; color:#aaa;">
+                        <p style="font-size:1.5rem;">📭</p>
+                        <p>Nenhuma candidatura encontrada.</p>
+                    </div>`;
+                return;
+            }
+            
+            candidaturas.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            candidaturas.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'candidate-item';
+                div.innerHTML = `
+                    <div class="candidate-header">
+                        <div>
+                            <div class="candidate-name">${c.nome}</div>
+                            <div class="candidate-code">${c.codigo_inscricao}</div>
+                        </div>
+                        <span class="status-badge status-${c.status.toLowerCase()}">${c.status}</span>
+                    </div>
+                    <div class="candidate-details">
+                        <div><strong>📧</strong> ${c.email || '—'}</div>
+                        <div><strong>📞</strong> ${c.telefone || '—'}</div>
+                        <div><strong>🏢</strong> ${c.empresa || '—'}</div>
+                        <div><strong>💼</strong> ${c.cargo || '—'}</div>
+                        <div><strong>🎓</strong> ${c.estudante_rh || '—'}</div>
+                        <div><strong>📅</strong> ${formatarData(c.data_inscricao)}</div>
+                    </div>
+                    <div class="candidate-actions">
+                        <select class="status-select" onchange="atualizarStatus('${c.codigo_inscricao}', this.value)">
+                            <option value="Recebida" ${c.status === 'Recebida' ? 'selected' : ''}>📥 Recebida</option>
+                            <option value="Contactada" ${c.status === 'Contactada' ? 'selected' : ''}>📞 Contactada</option>
+                            <option value="Aprovada" ${c.status === 'Aprovada' ? 'selected' : ''}>✅ Aprovada</option>
+                            <option value="Arquivada" ${c.status === 'Arquivada' ? 'selected' : ''}>📁 Arquivada</option>
+                        </select>
+                        <button class="export-btn" onclick="exportarCandidatura('${c.codigo_inscricao}')">
+                            📄 Exportar PDF
+                        </button>
+                    </div>`;
+                candidaturasListEl.appendChild(div);
+            });
+        }
+
+        // ==================== ATUALIZAR STATUS ====================
+        async function atualizarStatus(codigo, novoStatus) {
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `action=updateCandidateStatus&codigoInscricao=${encodeURIComponent(codigo)}&novoStatus=${encodeURIComponent(novoStatus)}`
+                });
+                const result = await response.json();
+                if (result.success) {
+                    carregarDashboard();
+                } else {
+                    alert('Erro: ' + result.message);
+                }
+            } catch (err) {
+                alert('Erro de conexão ao atualizar status.');
+            }
+        }
+
+        // ==================== EXPORTAR PDF ====================
+        function exportarCandidatura(codigo) {
+            const candidatura = todasCandidaturas.find(c => c.codigo_inscricao === codigo);
+            if (!candidatura) return alert('Candidatura não encontrada.');
+            
+            const conteudo = `<!DOCTYPE html><html><head><title>Ficha ${codigo}</title><style>
+                body{font-family:Arial;padding:20px;line-height:1.6;color:#333}
+                .header{text-align:center;border-bottom:3px solid rgb(1,15,60);padding-bottom:20px;margin-bottom:25px}
+                .header h1{color:rgb(1,15,60)}.section{margin-bottom:20px;padding:15px;background:#f4f6f9;border-left:4px solid rgb(1,15,60)}
+                .section-title{font-weight:bold;color:rgb(1,15,60);margin-bottom:10px}
+                .field{display:flex;margin-bottom:6px}.label{font-weight:bold;width:180px}
+                @media print{.section{break-inside:avoid}}
+            </style></head><body>
+                <div class="header"><h1>FICHA DE INSCRIÇÃO – AGETRHA</h1>
+                    <p>1.º Fórum de Gestores e Técnicos de RH de Angola</p>
+                    <p><strong>${candidatura.codigo_inscricao}</strong></p></div>
+                <div class="section"><div class="section-title">DADOS PESSOAIS</div>
+                    <div class="field"><span class="label">Nome:</span>${candidatura.nome}</div>
+                    <div class="field"><span class="label">Email:</span>${candidatura.email||'—'}</div>
+                    <div class="field"><span class="label">Telefone:</span>${candidatura.telefone||'—'}</div>
+                    <div class="field"><span class="label">Estudante de RH:</span>${candidatura.estudante_rh||'—'}</div></div>
+                <div class="section"><div class="section-title">DADOS PROFISSIONAIS</div>
+                    <div class="field"><span class="label">Empresa:</span>${candidatura.empresa||'—'}</div>
+                    <div class="field"><span class="label">Cargo:</span>${candidatura.cargo||'—'}</div></div>
+                <div class="section"><div class="section-title">INSCRIÇÃO</div>
+                    <div class="field"><span class="label">Data:</span>${formatarData(candidatura.data_inscricao)}</div>
+                    <div class="field"><span class="label">Status:</span>${candidatura.status}</div>
+                    <div class="field"><span class="label">Registo:</span>${formatarData(candidatura.timestamp)}</div></div>
+            </body></html>`;
+            
+            const janela = window.open('', '_blank');
+            janela.document.write(conteudo);
+            janela.document.close();
+            setTimeout(() => janela.print(), 400);
+        }
+
+        function formatarData(dataString) {
+            if (!dataString) return 'N/A';
+            try {
+                return new Date(dataString).toLocaleDateString('pt-PT');
+            } catch {
+                return dataString;
+            }
+        }
+
+        // ==================== FILTROS ====================
+        searchInput.addEventListener('input', aplicarFiltros);
+        statusFilter.addEventListener('change', aplicarFiltros);
+        estudanteFilter.addEventListener('change', aplicarFiltros);
+
+        function aplicarFiltros() {
+            const termo = searchInput.value.toLowerCase();
+            const statusSel = statusFilter.value;
+            const estudanteSel = estudanteFilter.value;
+            
+            const filtradas = todasCandidaturas.filter(c => {
+                const matchPesquisa = !termo || 
+                    (c.nome?.toLowerCase().includes(termo)) ||
+                    (c.codigo_inscricao?.toLowerCase().includes(termo)) ||
+                    (c.email?.toLowerCase().includes(termo)) ||
+                    (c.empresa?.toLowerCase().includes(termo));
+                const matchStatus = !statusSel || c.status === statusSel;
+                const matchEstudante = !estudanteSel || 
+                    (c.estudante_rh?.toLowerCase() === estudanteSel.toLowerCase());
+                return matchPesquisa && matchStatus && matchEstudante;
+            });
+            
+            atualizarListaCandidaturas(filtradas);
+        }
+    </script>
+</body>
+</html>
