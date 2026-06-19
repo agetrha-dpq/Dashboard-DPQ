@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard AGETRHA · Gestão de Inscrições</title>
-    <!-- Chart.js para gráficos -->
+    <title>Dashboard AGETRHA · Gestão de Inscrições Fórum</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -37,15 +36,96 @@
             align-items: center;
         }
 
+        /* ===== MODAL DE LOGIN ===== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-box {
+            background: linear-gradient(145deg, rgb(1, 15, 60), rgb(10, 25, 80));
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .modal-box h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #FFD700;
+        }
+
+        .modal-box p {
+            color: #dddddd;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+        }
+
+        .modal-box input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            outline: none;
+            margin-bottom: 20px;
+            transition: border 0.2s;
+        }
+
+        .modal-box input[type="password"]:focus {
+            border-color: #FFD700;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .modal-box button {
+            background: #FFD700;
+            color: rgb(1, 15, 60);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .modal-box button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .login-error {
+            color: #ff6b6b;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        /* ===== DASHBOARD ===== */
         .dashboard {
             width: 100%;
             max-width: 1300px;
-            display: flex;
+            display: none;
             flex-direction: column;
             gap: 30px;
         }
 
-        /* ----- CABEÇALHO COM LOGOTIPOS ----- */
         .dashboard-header {
             display: flex;
             align-items: center;
@@ -86,7 +166,6 @@
             margin-top: 4px;
         }
 
-        /* ----- MÉTRICAS (CARDS) ----- */
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -137,7 +216,6 @@
             color: var(--text-secondary);
         }
 
-        /* ----- GRÁFICO (Chart.js) ----- */
         .chart-section {
             background: var(--surface);
             backdrop-filter: blur(8px);
@@ -164,7 +242,6 @@
             margin: 0 auto;
         }
 
-        /* ----- LISTA DE CANDIDATURAS ----- */
         .candidates-section {
             background: var(--surface);
             backdrop-filter: blur(8px);
@@ -179,6 +256,7 @@
             gap: 15px;
             margin-bottom: 20px;
             flex-wrap: wrap;
+            align-items: center;
         }
 
         .filters input,
@@ -323,7 +401,6 @@
             border-color: var(--accent);
         }
 
-        /* ----- LOADING ----- */
         .loading {
             display: flex;
             flex-direction: column;
@@ -347,7 +424,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* ----- RESPONSIVO ----- */
         @media (max-width: 768px) {
             .dashboard-header {
                 flex-direction: column;
@@ -367,8 +443,21 @@
     </style>
 </head>
 <body>
+    <!-- MODAL DE LOGIN -->
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-box">
+            <h2>🔐 Acesso Restrito</h2>
+            <p>Insira a senha para aceder ao dashboard</p>
+            <form id="loginForm">
+                <input type="password" id="loginPassword" placeholder="Senha" required>
+                <button type="submit">Entrar</button>
+            </form>
+            <p id="loginError" class="login-error"></p>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
     <div class="dashboard">
-        <!-- CABEÇALHO COM LOGOTIPOS -->
         <header class="dashboard-header">
             <img class="header-logo" src="https://drive.google.com/thumbnail?id=175eeVBQfvPjNqJxlWIxQKKprJzq79ERw&sz=w500" alt="AGETRHA Logo 1">
             <div class="header-title">
@@ -378,7 +467,6 @@
             <img class="header-logo" src="https://drive.google.com/thumbnail?id=1UsOKh3Gvd-br6w3KTesth08sgBqjCPEX&sz=w500" alt="AGETRHA Logo 2">
         </header>
 
-        <!-- CARDS DE MÉTRICAS -->
         <div class="metrics-grid">
             <div class="metric-card">
                 <div class="metric-icon">👥</div>
@@ -403,7 +491,6 @@
             </div>
         </div>
 
-        <!-- GRÁFICO DE STATUS (Chart.js) -->
         <div class="chart-section">
             <div class="section-title">📊 Distribuição por Status</div>
             <div class="chart-container">
@@ -411,7 +498,6 @@
             </div>
         </div>
 
-        <!-- LISTA DE CANDIDATURAS -->
         <div class="candidates-section">
             <div class="section-title">📋 Candidaturas Individuais</div>
             <div class="filters">
@@ -428,6 +514,7 @@
                     <option value="Sim">Estudante de RH</option>
                     <option value="Não">Não estudante</option>
                 </select>
+                <button class="export-btn" onclick="imprimirLista()" style="margin-left: auto;">🖨️ Imprimir Lista</button>
             </div>
 
             <div class="loading" id="loadingCandidates" style="display: none;">
@@ -440,10 +527,10 @@
     </div>
 
     <script>
-        // Configuração do Google Apps Script
+        // ⚠️ ATUALIZE ESTA URL com a nova URL gerada após publicar o GAS modificado
+        const AUTH_URL = 'https://script.google.com/macros/s/AKfycbz45vy9XfEnYOVQdF_ZlvXYaPgrmCvc_Bkdiw7-0glHcsOr5x0yoc78zgJXZY3vCsby/exec';
         const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwl2lT8C4SzZUJbryqZwqsRlFtynkp6lxqcZxP80hRyj9oMV66F7QEYaOWLfUMqmMQV/exec';
         
-        // Elementos DOM
         const totalCandidaturasEl = document.getElementById('totalCandidaturas');
         const novasEsteMesEl = document.getElementById('novasEsteMes');
         const candidaturasPendentesEl = document.getElementById('candidaturasPendentes');
@@ -453,24 +540,78 @@
         const searchInput = document.getElementById('searchInput');
         const statusFilter = document.getElementById('statusFilter');
         const estudanteFilter = document.getElementById('estudanteFilter');
+        const loginModal = document.getElementById('loginModal');
+        const loginForm = document.getElementById('loginForm');
+        const loginPassword = document.getElementById('loginPassword');
+        const loginError = document.getElementById('loginError');
+        const dashboard = document.querySelector('.dashboard');
         
         let todasCandidaturas = [];
         let statusChart = null;
 
-        // Inicialização
-        carregarDashboard();
+        // ==================== AUTENTICAÇÃO (FormData) ====================
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('authenticated') === 'true') {
+                mostrarDashboard();
+            } else {
+                loginModal.style.display = 'flex';
+                dashboard.style.display = 'none';
+            }
+        });
 
-        // ==================== FUNÇÕES DE DADOS ====================
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const password = loginPassword.value.trim();
+            if (!password) return;
+
+            loginError.style.display = 'none';
+            const btn = loginForm.querySelector('button');
+            const originalText = btn.textContent;
+            btn.textContent = 'Verificando...';
+            btn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('action', 'validateDashboardPassword');
+                formData.append('password', password);
+                formData.append('department', 'DPQ'); // ajuste se necessário
+
+                const res = await fetch(AUTH_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.success && data.valid) {
+                    sessionStorage.setItem('authenticated', 'true');
+                    mostrarDashboard();
+                } else {
+                    loginError.textContent = data.message || 'Senha inválida.';
+                    loginError.style.display = 'block';
+                }
+            } catch (err) {
+                loginError.textContent = 'Erro de conexão. Tente novamente.';
+                loginError.style.display = 'block';
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        function mostrarDashboard() {
+            loginModal.style.display = 'none';
+            dashboard.style.display = 'flex';
+            carregarDashboard();
+        }
+
+        // ==================== DADOS ====================
         async function carregarDashboard() {
             loadingEl.style.display = 'flex';
             candidaturasListEl.innerHTML = '';
-            
             try {
                 const [candidaturas, stats] = await Promise.all([
                     obterCandidaturas(),
                     obterEstatisticas()
                 ]);
-                
                 todasCandidaturas = candidaturas;
                 atualizarMetricas(stats);
                 atualizarGrafico(stats.porStatus);
@@ -497,28 +638,22 @@
             throw new Error(result.message);
         }
 
-        // ==================== MÉTRICAS ====================
         function atualizarMetricas(stats) {
             totalCandidaturasEl.textContent = stats.total;
             novasEsteMesEl.textContent = stats.esteMes;
             const pendentes = stats.porStatus['Recebida'] || 0;
             candidaturasPendentesEl.textContent = pendentes;
-            
             const contactadas = stats.porStatus['Contactada'] || 0;
             const aprovadas = stats.porStatus['Aprovada'] || 0;
-            const taxa = stats.total > 0 
-                ? Math.round(((contactadas + aprovadas) / stats.total) * 100) 
-                : 0;
+            const taxa = stats.total > 0 ? Math.round(((contactadas + aprovadas) / stats.total) * 100) : 0;
             taxaContactoEl.textContent = taxa + '%';
         }
 
-        // ==================== GRÁFICO (Chart.js) ====================
         function atualizarGrafico(porStatus) {
             const ctx = document.getElementById('statusChart').getContext('2d');
             const labels = ['Recebida', 'Contactada', 'Aprovada', 'Arquivada'];
             const dados = labels.map(status => porStatus[status] || 0);
             const backgroundColors = ['#3498db', '#f39c12', '#27ae60', '#95a5a6'];
-            
             if (statusChart) {
                 statusChart.data.datasets[0].data = dados;
                 statusChart.update();
@@ -564,20 +699,13 @@
             }
         }
 
-        // ==================== LISTA DE CANDIDATOS ====================
         function atualizarListaCandidaturas(candidaturas) {
             candidaturasListEl.innerHTML = '';
             if (candidaturas.length === 0) {
-                candidaturasListEl.innerHTML = `
-                    <div style="text-align:center; padding:40px; color:#aaa;">
-                        <p style="font-size:1.5rem;">📭</p>
-                        <p>Nenhuma candidatura encontrada.</p>
-                    </div>`;
+                candidaturasListEl.innerHTML = `<div style="text-align:center;padding:40px;color:#aaa;"><p style="font-size:1.5rem;">📭</p><p>Nenhuma candidatura encontrada.</p></div>`;
                 return;
             }
-            
             candidaturas.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            
             candidaturas.forEach(c => {
                 const div = document.createElement('div');
                 div.className = 'candidate-item';
@@ -604,15 +732,13 @@
                             <option value="Aprovada" ${c.status === 'Aprovada' ? 'selected' : ''}>✅ Aprovada</option>
                             <option value="Arquivada" ${c.status === 'Arquivada' ? 'selected' : ''}>📁 Arquivada</option>
                         </select>
-                        <button class="export-btn" onclick="exportarCandidatura('${c.codigo_inscricao}')">
-                            📄 Exportar PDF
-                        </button>
+                        <button class="export-btn" onclick="exportarCandidatura('${c.codigo_inscricao}')">📄 Exportar PDF</button>
+                        <button class="export-btn" onclick="gerarConvite('${c.codigo_inscricao}')">🎫 Convite</button>
                     </div>`;
                 candidaturasListEl.appendChild(div);
             });
         }
 
-        // ==================== ATUALIZAR STATUS ====================
         async function atualizarStatus(codigo, novoStatus) {
             try {
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
@@ -621,21 +747,16 @@
                     body: `action=updateCandidateStatus&codigoInscricao=${encodeURIComponent(codigo)}&novoStatus=${encodeURIComponent(novoStatus)}`
                 });
                 const result = await response.json();
-                if (result.success) {
-                    carregarDashboard();
-                } else {
-                    alert('Erro: ' + result.message);
-                }
+                if (result.success) carregarDashboard();
+                else alert('Erro: ' + result.message);
             } catch (err) {
                 alert('Erro de conexão ao atualizar status.');
             }
         }
 
-        // ==================== EXPORTAR PDF ====================
         function exportarCandidatura(codigo) {
             const candidatura = todasCandidaturas.find(c => c.codigo_inscricao === codigo);
             if (!candidatura) return alert('Candidatura não encontrada.');
-            
             const conteudo = `<!DOCTYPE html><html><head><title>Ficha ${codigo}</title><style>
                 body{font-family:Arial;padding:20px;line-height:1.6;color:#333}
                 .header{text-align:center;border-bottom:3px solid rgb(1,15,60);padding-bottom:20px;margin-bottom:25px}
@@ -644,9 +765,7 @@
                 .field{display:flex;margin-bottom:6px}.label{font-weight:bold;width:180px}
                 @media print{.section{break-inside:avoid}}
             </style></head><body>
-                <div class="header"><h1>FICHA DE INSCRIÇÃO – AGETRHA</h1>
-                    <p>1.º Fórum de Gestores e Técnicos de RH de Angola</p>
-                    <p><strong>${candidatura.codigo_inscricao}</strong></p></div>
+                <div class="header"><h1>FICHA DE INSCRIÇÃO – AGETRHA</h1><p>1.º Fórum de Gestores e Técnicos de RH de Angola</p><p><strong>${candidatura.codigo_inscricao}</strong></p></div>
                 <div class="section"><div class="section-title">DADOS PESSOAIS</div>
                     <div class="field"><span class="label">Nome:</span>${candidatura.nome}</div>
                     <div class="field"><span class="label">Email:</span>${candidatura.email||'—'}</div>
@@ -660,23 +779,91 @@
                     <div class="field"><span class="label">Status:</span>${candidatura.status}</div>
                     <div class="field"><span class="label">Registo:</span>${formatarData(candidatura.timestamp)}</div></div>
             </body></html>`;
-            
             const janela = window.open('', '_blank');
             janela.document.write(conteudo);
             janela.document.close();
             setTimeout(() => janela.print(), 400);
         }
 
-        function formatarData(dataString) {
-            if (!dataString) return 'N/A';
-            try {
-                return new Date(dataString).toLocaleDateString('pt-PT');
-            } catch {
-                return dataString;
-            }
+        function imprimirLista() {
+            if (todasCandidaturas.length === 0) { alert('Nenhuma candidatura disponível.'); return; }
+            const lista = [...todasCandidaturas].sort((a, b) => a.nome.localeCompare(b.nome));
+            let linhas = '';
+            lista.forEach((c, index) => {
+                const assento = c.assento || c.codigo_inscricao || '—';
+                linhas += `<tr><td>${index + 1}</td><td>${c.nome}</td><td>${assento}</td><td>${c.status}</td></tr>`;
+            });
+            const conteudo = `<!DOCTYPE html><html><head><title>Lista de Inscrições</title><style>
+                body{font-family:Arial;padding:20px;color:#000}
+                .header{text-align:center;border-bottom:3px solid rgb(1,15,60);padding-bottom:20px;margin-bottom:25px}
+                .header h1{color:rgb(1,15,60)}
+                table{width:100%;border-collapse:collapse;margin-top:15px}
+                th{background:rgb(1,15,60);color:white;padding:10px;text-align:left;-webkit-print-color-adjust: exact;print-color-adjust: exact;}
+                td{padding:10px;border-bottom:1px solid #ddd}
+                tr:nth-child(even){background:#f2f2f2}
+                @media print{body{padding:0}.header{margin-bottom:20px}th{-webkit-print-color-adjust: exact;print-color-adjust: exact;}}
+            </style></head><body>
+                <div class="header"><h1>LISTA GERAL DE INSCRIÇÕES</h1><p>1.º Fórum Nacional dos Gestores e Técnicos de Recursos Humanos de Angola</p><p><strong>Total de inscrições: ${lista.length}</strong></p></div>
+                <table><thead><tr><th>Nº</th><th>Nome do Convidado</th><th>Nº do Assento</th><th>Status</th></tr></thead><tbody>${linhas}</tbody></table>
+            </body></html>`;
+            const janela = window.open('', '_blank');
+            janela.document.write(conteudo);
+            janela.document.close();
+            setTimeout(() => janela.print(), 400);
         }
 
-        // ==================== FILTROS ====================
+        function gerarConvite(codigo) {
+            const candidatura = todasCandidaturas.find(c => c.codigo_inscricao === codigo);
+            if (!candidatura) return alert('Candidatura não encontrada.');
+            const assento = candidatura.assento || candidatura.codigo_inscricao || '—';
+            const nome = candidatura.nome;
+            const conviteNumero = candidatura.codigo_inscricao;
+            const conteudo = `<!DOCTYPE html><html><head><title>Convite ${conviteNumero}</title><style>
+                *{margin:0;padding:0;box-sizing:border-box}
+                body{font-family:'Segoe UI',Arial,sans-serif;background-color: rgb(1, 15, 60);color: #ffffff;display: flex;justify-content: center;align-items: center;min-height: 100vh;padding: 20px;}
+                .convite{max-width: 750px;width: 100%;background: linear-gradient(145deg, rgba(1,15,60,1) 0%, rgba(10,25,80,1) 100%);border: 2px solid rgba(255,255,255,0.3);border-radius: 24px;padding: 40px 30px;box-shadow: 0 20px 40px rgba(0,0,0,0.5);}
+                .topo{display: flex;justify-content: space-between;align-items: center;margin-bottom: 50px;}
+                .logo{width: 110px;height: auto;filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));background: rgba(255,255,255,0.1);border-radius: 12px;padding: 5px;}
+                .titulo{text-align: center;flex: 1;padding: 0 15px;}
+                .titulo h1{font-size: 2.4rem;color: #FFD700;letter-spacing: 2px;text-shadow: 0 2px 10px rgba(255,215,0,0.4);}
+                .titulo p{font-size: 0.9rem;color: #dddddd;margin-top: 5px;line-height: 1.4;}
+                .corpo{text-align: center;margin: 40px 0;}
+                .convite-num{font-size: 1.6rem;font-weight: bold;color: #FFD700;margin-bottom: 30px;letter-spacing: 1px;}
+                .convite-num span{background: rgba(255,215,0,0.15);padding: 8px 24px;border-radius: 50px;border: 1px solid #FFD700;}
+                .nome-participante{font-size: 2.6rem;font-weight: bold;margin: 30px 0 15px;color: #ffffff;text-shadow: 0 0 15px rgba(255,255,255,0.5);}
+                .assento{font-size: 1.3rem;margin: 15px 0;color: #FFD700;}
+                .rodape{margin-top: 50px;text-align: center;font-size: 0.9rem;color: #bbbbbb;}
+                @media print{body{background:rgb(1,15,60);-webkit-print-color-adjust:exact;print-color-adjust:exact}.convite{border:1px solid #fff;box-shadow:none}}
+            </style></head><body>
+                <div class="convite">
+                    <div class="topo">
+                        <img class="logo" src="https://drive.google.com/thumbnail?id=175eeVBQfvPjNqJxlWIxQKKprJzq79ERw&sz=w500" alt="AGETRHA">
+                        <div class="titulo"><h1>CONVITE</h1><p>1.º Fórum Nacional dos Gestores e Técnicos de Recursos Humanos de Angola</p></div>
+                        <img class="logo" src="https://drive.google.com/thumbnail?id=1UsOKh3Gvd-br6w3KTesth08sgBqjCPEX&sz=w500" alt="Fórum RH Angola">
+                    </div>
+                    <div class="corpo">
+                        <div class="convite-num"><span>CONVITE Nº ${conviteNumero}</span></div>
+                        <p style="font-size:1.1rem;color:#ddd;">Convidamos</p>
+                        <div class="nome-participante">${nome}</div>
+                        <div class="assento"><strong>Nº do Assento:</strong> ${assento}</div>
+                    </div>
+                    <div class="rodape">
+                        <p>Apresente este convite no dia do evento.</p>
+                        <p style="margin-top:8px;">AGETRHA – Associação dos Gestores e Técnicos de Recursos Humanos de Angola</p>
+                    </div>
+                </div>
+            </body></html>`;
+            const janela = window.open('', '_blank');
+            janela.document.write(conteudo);
+            janela.document.close();
+            setTimeout(() => janela.print(), 500);
+        }
+
+        function formatarData(dataString) {
+            if (!dataString) return 'N/A';
+            try { return new Date(dataString).toLocaleDateString('pt-PT'); } catch { return dataString; }
+        }
+
         searchInput.addEventListener('input', aplicarFiltros);
         statusFilter.addEventListener('change', aplicarFiltros);
         estudanteFilter.addEventListener('change', aplicarFiltros);
@@ -685,7 +872,6 @@
             const termo = searchInput.value.toLowerCase();
             const statusSel = statusFilter.value;
             const estudanteSel = estudanteFilter.value;
-            
             const filtradas = todasCandidaturas.filter(c => {
                 const matchPesquisa = !termo || 
                     (c.nome?.toLowerCase().includes(termo)) ||
@@ -697,7 +883,6 @@
                     (c.estudante_rh?.toLowerCase() === estudanteSel.toLowerCase());
                 return matchPesquisa && matchStatus && matchEstudante;
             });
-            
             atualizarListaCandidaturas(filtradas);
         }
     </script>
